@@ -6,4 +6,5 @@ Puppet module to install/configure puppet (agents and masters). Includes a few s
 A few assumptions are made with this module at this time:
 
 1) Auto-signing is acceptable/desired.
+
 2) Puppet masters will be behind a VIP/CNAME.
