@@ -1,0 +1,28 @@
+
+# THE FOLLOWING SECTION IS MANAGED BY PUPPET
+# <%= file.split(File::SEPARATOR)[5..-1].join(File::SEPARATOR) %>
+
+[master]
+    autoflush = <%= autoflush %>
+    reports = <%= reports %>
+    reporturl = <%= reporturl %>
+    ssl_client_header = <%= ssl_client_header %>
+    ssl_client_verify_header = <%= ssl_client_verify_header %>
+    external_nodes = '<%= external_nodes %>'
+    node_terminus = <%= node_terminus %>
+
+[qa]
+    modulepath = /etc/puppet/env/qa/modules
+    manifestdir = /etc/puppet/env/qa/manifests
+
+[stage]
+    modulepath = /etc/puppet/env/stage/modules
+    manifestdir = /etc/puppet/env/stage/manifests
+
+[production]
+    modulepath = /etc/puppet/env/production/modules
+    manifestdir = /etc/puppet/env/production/manifests
+
+[schoolfeeds]
+    modulepath = /etc/puppet/env/schoolfeeds/modules
+    manifestdir = /etc/puppet/env/schoolfeeds/manifests

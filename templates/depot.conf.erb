@@ -1,0 +1,10 @@
+# THIS FILE IS MANAGED BY PUPPET
+# <%= file.split(File::SEPARATOR)[5..-1].join(File::SEPARATOR) %>
+
+Alias /depot "/var/www/depot/"
+<Directory "/var/www/depot">
+	Options Indexes FollowSymLinks ExecCGI
+	AllowOverride All
+	Order allow,deny
+	Allow from all
+</Directory>

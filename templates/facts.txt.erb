@@ -1,0 +1,7 @@
+# THIS FILE IS MANAGED BY PUPPET
+# <%= file.split(File::SEPARATOR)[5..-1].join(File::SEPARATOR) %>
+#
+# The facts in this file are only updated when the file is created. To get the
+# latest facts, delete this file and re-run puppet.
+
+<%= scope.to_hash.reject { |k,v| !( k.is_a?(String) && v.is_a?(String) ) }.to_yaml %>

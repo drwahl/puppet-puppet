@@ -1,0 +1,47 @@
+# THIS FILE IS MANAGED BY PUPPET
+# <%= file.split(File::SEPARATOR)[5..-1].join(File::SEPARATOR) %>
+
+# We don't need extra compatibility for puppetmasterd
+PassengerHighPerformance <%= passenger_high_performance %>
+PassengerMaxPoolSize <%= passenger_max_pool_size %>
+PassengerMinInstances <%= passenger_min_instances %>
+# We want the puppetmasterd processes to expire so they can auto-refresh.
+PassengerPoolIdleTime <%= passenger_pool_idle_time %>
+# PassengerMaxRequests 1000
+PassengerStatThrottleRate <%= passenger_stat_throttle_rate %>
+PassengerUseGlobalQueue <%= passenger_use_global_queue %>
+PassengerUser puppet
+PassengerGroup puppet
+
+RackAutoDetect <%= passenger_rack_autodetect %>
+RailsAutoDetect <%= passenger_rails_autodetect %>
+
+Listen 8140
+
+<VirtualHost *:8140>
+        SSLEngine on
+        SSLProtocol -ALL +SSLv3 +TLSv1
+        SSLCipherSuite ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:-LOW:-SSLv2:-EXP
+
+	SSLCertificateFile /etc/puppet/rack/ssl/<%= puppet_server %>.pem
+	SSLCertificateKeyFile /etc/puppet/rack/ssl/private_keys/<%= puppet_server %>.pem
+	SSLCertificateChainFile /etc/puppet/rack/ssl/ca_crt.pem
+	SSLCACertificateFile /etc/puppet/rack/ssl/ca_crt.pem
+
+        # If Apache complains about invalid signatures on the CRL, you can try disabling
+        # CRL checking by commenting the next line, but this is not recommended.
+        SSLCARevocationFile     /etc/puppet/rack/ssl/ca_crl.pem
+        SSLVerifyClient optional
+        SSLVerifyDepth  1
+        SSLOptions +StdEnvVars
+
+        DocumentRoot /etc/puppet/rack/public/
+        RackBaseURI /
+        <Directory /etc/puppet/rack/>
+                Options None
+                AllowOverride None
+                Order allow,deny
+                allow from all
+        </Directory>
+</VirtualHost>
+

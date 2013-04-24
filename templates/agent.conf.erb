@@ -1,0 +1,22 @@
+# THIS FILE IS MANAGED BY PUPPET
+# <%= file.split(File::SEPARATOR)[5..-1].join(File::SEPARATOR) %>
+
+[main]
+    vardir = <%= vardir %>
+    logdir = <%= logdir %>
+    rundir = <%= rundir %>
+    ssldir = <%= ssldir %>
+    libdir = <%= libdir %>
+    pluginsync = <%= pluginsync %>
+
+[agent]
+    environment = <%= environment %>
+    classfile = <%= classfile %>
+    localconfig = <%= localconfig %>
+    autoflush = <%= autoflush %>
+    report = <%= report %>
+    ca_server = <%= ca_server %>
+    server = <%= server %>
+<% if @runinterval -%>
+    runinterval = <%= runinterval %>
+<% end -%>

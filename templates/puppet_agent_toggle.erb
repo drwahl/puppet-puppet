@@ -1,0 +1,100 @@
+#!/bin/bash
+
+### THIS FILE IS MANAGED BY PUPPET
+### <%= file.split(File::SEPARATOR)[5..-1].join(File::SEPARATOR) %>
+
+max_disable=1441
+default_puppetmaster=puppet.example.com
+recipients="puppet_admins@example.com"
+osver=<%= operatingsystemrelease %>
+
+function puppet_enable {
+    echo "Enabling puppet agent"
+    puppet agent --enable
+    if [[ $? != 0 ]]
+    then
+        echo "Enable failed. Attempting service restart..."
+        /sbin/service puppet restart
+    fi
+    PUPPET_SERVER=`grep PUPPET_SERVER /etc/sysconfig/puppet 2>/dev/null| cut -d \= -f 2 2>/dev/null`
+    if [[ $PUPPET_SERVER == "" ]]
+    then
+        PUPPET_SERVER=$default_puppetmaster
+    fi
+    puppet agent -t -l /var/log/puppet/puppet.log --server=$PUPPET_SERVER
+}
+
+function puppet_disable {
+    if [[ $disable_length == "" ]]
+    then
+        echo "Please supply the number of minutes (less than $max_disable) to disable puppet agent."
+        exit 1
+    else
+        if ! [[ "$disable_length" =~ ^[0-9]+$ ]]
+        then
+            echo "Please supply a number of minutes (less than $max_disable) to disable puppet agent."
+            exit 1
+        else
+            if (( $disable_length <= $max_disable ))
+            then
+                if [[ $SUDO_USER == "" ]]
+                then
+                    RUNUSER=`whoami`
+                else
+                    RUNUSER=$SUDO_USER
+                fi
+                puppet agent --disable
+                echo "puppet agent disabled for $disable_length minutes"
+                ondate=`date --date "now + $disable_length minutes"`
+                echo "" >> /etc/motd
+                echo "[1;36mPUPPET DISABLED ON THIS SERVER!!! (by $RUNUSER)" >> /etc/motd
+                echo "puppet will be automatically re-enabled on $ondate [0m" >> /etc/motd
+                echo "" >> /etc/motd
+                at now + $disable_length min -M -f $script_location
+                email_message=`mktemp`
+                echo "$RUNUSER has disabled puppet on `hostname`." > $email_message
+                echo "Puppet will be renabled on $ondate" >> $email_message
+                if [[ "$recipients" != "" ]]
+                then
+                    if [[ "$osver" == 5 ]]
+                    then
+                        mail -s "Puppet agent disabled on `hostname` by $RUNUSER" $recipients < $email_message
+                    else
+                        mail -s "Puppet agent disabled on `hostname` by $RUNUSER" -r "$RUNUSER"@`hostname` $recipients < $email_message
+                       
+                    fi
+                fi
+                rm $email_message
+            else
+                echo "Please supply a number less than $max_disable."
+                exit 1
+            fi
+        fi
+    fi
+}
+
+case $1 in
+    "-e" )
+        puppet_enable
+        ;;
+    "" )
+        puppet_enable
+        ;;
+    "-d" )
+        #grab our variables now, as functions are child processes
+        disable_length=$2
+        script_name=`basename $0`
+        script_location=`which $script_name`
+        puppet_disable
+        ;;
+    * )
+        echo "$0 is a wrapper script to disable puppet.
+
+Usage: $0 -e
+       $0 -d <number>
+
+    -e Enable puppet agent (force a run). This is the same as not passing any flags.
+    -d Disable puppet agent for <nubmer> minutes. Must be less than $max_disable.
+"
+        ;;
+esac
